@@ -7,7 +7,7 @@
 
 ## 简介
 
-Infinicube 是一个基于 Three.js 的 React 组件库，提供了一个 3D 无限画布组件，让用户能够在三维空间中可视化管理资源。通过将资源表示为各种几何体，用户可以在无限延伸的 3D 空间中组织、浏览和管理自己的资源库。
+Infinicube 是一个基于 React Three Fiber 和 @react-three/drei 的 React 组件库，提供了一个 3D 无限画布组件，让用户能够在三维空间中可视化管理资源。通过将资源表示为各种几何体，用户可以在无限延伸的 3D 空间中组织、浏览和管理自己的资源库。
 
 ## 特性
 
@@ -36,13 +36,17 @@ pnpm add infinicube
 
 ```jsx
 import React from 'react';
-import { Infinicube } from 'infinicube';
-import 'infinicube/dist/style.css';
+import { World } from 'infinicube';
+import { Box } from '@react-three/drei';
 
 function App() {
   return (
     <div style={{ width: '100vw', height: '100vh' }}>
-      <Infinicube />
+      <World showGrid={true} showStats={false}>
+        <Box position={[0, 1, 0]}>
+          <meshStandardMaterial color="orange" />
+        </Box>
+      </World>
     </div>
   );
 }
