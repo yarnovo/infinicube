@@ -26,20 +26,41 @@
 - **交互操作**: 鼠标/触摸交互，支持选中、拖拽等操作
 - **性能优化**: 基于视锥体剔除和 LOD 技术的性能优化
 
-## 组件 API 设计
+## 组件架构
+
+### 核心组件
+
+1. **Stage** - Canvas 容器组件，提供 3D 渲染环境
+2. **World** - 3D 场景组件，包含灯光、控制器、网格等
+3. **Infinicube** - 主组件，管理立方体的创建、选择、删除
+
+### 组件 API
 
 ```jsx
+// Stage 组件 - 提供 Canvas 容器
+<Stage width="100%" height="600px" backgroundColor="#f0f0f0">
+  {children}
+</Stage>;
+
+// Infinicube 组件 - 立方体管理
+const ref = useRef < InfinicubeRef > null;
+
 <Infinicube
-  width="100%"
-  height="600px"
-  initialResources={resources}
-  theme={customTheme}
-  enabledShapes={['box', 'sphere', 'cylinder']}
-  onResourceCreate={(resource) => {}}
-  onResourceSelect={(resource) => {}}
-  onResourceUpdate={(resource) => {}}
-  onResourceDelete={(resourceId) => {}}
-/>
+  ref={ref}
+  initialCubes={cubes}
+  onCubeCreate={(cube) => {}}
+  onCubeSelect={(cube) => {}}
+  onCubeDelete={(id) => {}}
+  showGrid={true}
+  showStats={false}
+/>;
+
+// Ref API
+ref.current.createCube(position, { color, size });
+ref.current.selectCube(id);
+ref.current.deleteCube(id);
+ref.current.getCubes();
+ref.current.clearCubes();
 ```
 
 ## 开发规范
@@ -48,6 +69,7 @@
 - 组件使用函数式组件
 - 状态管理使用 React Hooks
 - Storybook 用于组件文档和测试
+- **React 自动导入**：TypeScript 已配置自动导入 React，不需要手动 import
 
 ## 项目定位
 
@@ -55,10 +77,97 @@
 
 ## 测试策略
 
-- **单元测试**: 使用 Vitest 进行逻辑测试
-- **组件测试**: 使用 @react-three/test-renderer 测试 3D 组件
-- **Mock 策略**: 在测试环境中 mock WebGL 上下文
-- **集成测试**: 测试组件间交互和状态管理
+### 测试框架配置
 
-<!-- 最后更新: 2025-07-11 -->
-<!-- 说明: Infinicube 项目技术规范和开发指南 -->
+- **单元测试**: Vitest 多项目配置（unit 和 storybook）
+- **3D 组件测试**: @react-three/test-renderer
+- **功能测试**: 组件 ref API 和状态管理测试
+- **Storybook 测试**: Play 函数自动化测试
+
+### @react-three/test-renderer 使用要点
+
+1. **测试范围**：测试组件结构和属性，不是视觉效果
+2. **场景查询**：使用 `findByType`、`findByProps` 查找 Three.js 对象
+3. **事件测试**：使用 `fireEvent` 触发交互事件
+4. **动画测试**：使用 `advanceFrames` 测试 useFrame hooks
+5. **限制**：不能渲染 Canvas 组件，需要分离组件结构
+
+### Mock 策略
+
+- **WebGL 上下文**：在 setup.ts 中手动实现 WebGL context mock
+- **ResizeObserver**：提供全局 mock 避免 Canvas 组件测试错误
+- **drei 组件**：mock Environment 和 Stats 组件避免加载外部资源
+- **React DOM**：使用 @testing-library/react 进行 DOM 测试
+
+### 测试实现要点
+
+1. **识别 drei Box 组件**
+
+   ```typescript
+   // Box 组件创建的 geometry 在 mesh.instance.geometry
+   const cubeMeshes = meshes.filter((mesh) => {
+     return mesh.instance.geometry?.type === 'BoxGeometry';
+   });
+   ```
+
+2. **避免循环引用**
+   - @react-three/test-renderer 的 toTree() 返回值有循环引用
+   - 不要使用 JSON.stringify，直接使用对象属性
+
+3. **组件测试分离**
+   - Stage：仅测试 DOM 结构
+   - World/Infinicube：使用 @react-three/test-renderer 测试 3D 结构
+
+## 项目结构
+
+```
+src/
+├── components/
+│   ├── stage.tsx       # Canvas 容器
+│   ├── world.tsx       # 3D 场景
+│   └── infinicube.tsx  # 主组件
+├── index.ts            # 导出入口
+tests/
+├── setup.ts            # 测试环境配置
+├── *-functional.test.tsx  # 功能测试
+└── *-props.test.tsx    # 属性测试
+stories/
+└── *.stories.tsx       # Storybook 故事
+```
+
+## 构建配置
+
+- **TypeScript**: tsconfig.build.json 专门用于构建
+- **Vite**: 使用 vite-plugin-dts 生成类型定义
+- **导出**: ES 模块格式，支持 tree-shaking
+
+## 常见问题与解决方案
+
+### 随机颜色生成
+
+生成随机十六进制颜色时，必须使用 `padStart(6, '0')` 确保始终为 6 位：
+
+```typescript
+`#${Math.floor(Math.random() * 16777215)
+  .toString(16)
+  .padStart(6, '0')}`;
+```
+
+否则可能生成无效的颜色值如 `#c79e1`。
+
+### Window 类型扩展
+
+在 Storybook 测试中需要在 Window 上存储 ref，应创建类型定义文件：
+
+```typescript
+// stories/global.d.ts
+declare global {
+  interface Window {
+    __infinicubeRef?: InfinicubeRef | null;
+  }
+}
+```
+
+<!-- 最后更新: 2025-01-11 -->
+<!-- 说明: Infinicube 项目技术规范、架构设计和测试策略 -->
+<!-- 测试已通过：所有单元测试和 Storybook 测试均正常工作 -->

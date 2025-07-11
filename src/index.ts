@@ -1,2 +1,8 @@
+export { Stage } from './components/stage';
+export type { StageProps } from './components/stage';
+
 export { World } from './components/world';
 export type { WorldProps } from './components/world';
+
+export { Infinicube } from './components/infinicube';
+export type { InfinicubeProps, InfinicubeRef, Cube } from './components/infinicube';

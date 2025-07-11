@@ -29,9 +29,8 @@ export default defineConfig({
     dts({
       insertTypesEntry: true,
       rollupTypes: true,
-      tsconfigPath: './tsconfig.app.json',
+      tsconfigPath: './tsconfig.build.json',
       outDir: 'dist',
-      exclude: ['src/**/*.stories.tsx', 'src/**/*.test.tsx', 'src/main.tsx', 'src/App.tsx'],
     }),
   ],
   resolve: {
@@ -73,6 +72,17 @@ export default defineConfig({
             ],
           },
           setupFiles: ['.storybook/vitest.setup.ts'],
+        },
+      },
+      // 单元测试项目配置
+      {
+        extends: true,
+        test: {
+          name: 'unit',
+          environment: 'jsdom',
+          include: ['tests/**/*.test.{ts,tsx}'],
+          exclude: ['node_modules', 'dist', '.storybook', 'stories'],
+          setupFiles: ['./tests/setup.ts'],
         },
       },
     ],

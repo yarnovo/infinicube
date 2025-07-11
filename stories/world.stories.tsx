@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { World } from '../components/world';
+import { World } from '../src/components/world';
 import { Box, Sphere, Torus } from '@react-three/drei';
 
 const meta = {
@@ -46,33 +46,6 @@ World 是一个基于 React Three Fiber 的 3D 场景容器组件，提供了完
 
 ## How - 如何使用？
 
-### 尺寸定义说明
-
-World 组件的尺寸可以通过 \`width\` 和 \`height\` 属性来控制：
-
-#### 1. 百分比尺寸（推荐）
-\`\`\`jsx
-<World width="100%" height="100%" />
-// 占满父容器的全部空间
-\`\`\`
-
-#### 2. 固定像素尺寸
-\`\`\`jsx
-<World width="800px" height="600px" />
-// 固定 800x600 像素的画布
-\`\`\`
-
-#### 3. 视口单位
-\`\`\`jsx
-<World width="100vw" height="100vh" />
-// 占满整个视口
-\`\`\`
-
-#### 4. 混合使用
-\`\`\`jsx
-<World width="100%" height="600px" />
-// 宽度自适应，高度固定
-\`\`\`
 
 ### 完整示例
 
@@ -83,11 +56,8 @@ import { Box } from '@react-three/drei'
 function App() {
   return (
     <World 
-      width="100%" 
-      height="600px"
       showGrid={true}
       showStats={true}
-      backgroundColor="#f0f0f0"
     >
       <Box position={[0, 1, 0]}>
         <meshStandardMaterial color="orange" />
@@ -99,34 +69,15 @@ function App() {
 
 ### 注意事项
 
-1. **父容器要求**：使用百分比尺寸时，确保父容器有明确的尺寸定义
-2. **性能考虑**：避免创建过大的画布，建议最大不超过 1920x1080
-3. **响应式设计**：优先使用百分比或视口单位，以适应不同屏幕尺寸
-4. **最小尺寸**：建议最小尺寸不小于 300x300 像素，以确保良好的交互体验
+1. **性能考虑**：避免创建过大的画布
+2. **响应式设计**：组件会自动适应容器尺寸
+3. **交互体验**：确保画布有足够的空间以提供良好的交互体验
         `,
       },
     },
   },
   tags: ['autodocs'],
   argTypes: {
-    width: {
-      control: 'text',
-      description: '世界容器宽度，支持像素值(如 800px)、百分比(如 100%)、视口单位(如 100vw)',
-      defaultValue: '100%',
-      table: {
-        type: { summary: 'string | number' },
-        defaultValue: { summary: '100%' },
-      },
-    },
-    height: {
-      control: 'text',
-      description: '世界容器高度，支持像素值(如 600px)、百分比(如 100%)、视口单位(如 100vh)',
-      defaultValue: '600px',
-      table: {
-        type: { summary: 'string | number' },
-        defaultValue: { summary: '600px' },
-      },
-    },
     showGrid: {
       control: 'boolean',
       description: '是否显示网格辅助线，有助于空间定位和尺寸参考',
@@ -145,15 +96,6 @@ function App() {
         defaultValue: { summary: 'false' },
       },
     },
-    backgroundColor: {
-      control: 'color',
-      description: '容器背景颜色，支持所有 CSS 颜色值',
-      defaultValue: '#f0f0f0',
-      table: {
-        type: { summary: 'string' },
-        defaultValue: { summary: '#f0f0f0' },
-      },
-    },
     children: {
       description: 'React Three Fiber 子元素，如 3D 对象、灯光等',
       table: {
@@ -168,22 +110,16 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    width: '100%',
-    height: '600px',
     showGrid: true,
     showStats: false,
-    backgroundColor: '#f0f0f0',
   },
 };
 
 export const WithObjects: Story = {
   name: '包含 3D 对象',
   args: {
-    width: '100%',
-    height: '600px',
     showGrid: true,
     showStats: true,
-    backgroundColor: '#e8f4f8',
   },
   render: (args) => (
     <World {...args}>
@@ -210,11 +146,8 @@ export const WithObjects: Story = {
 export const ResponsiveFullscreen: Story = {
   name: '响应式全屏',
   args: {
-    width: '100vw',
-    height: '100vh',
     showGrid: true,
     showStats: false,
-    backgroundColor: '#000000',
   },
   render: (args) => (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
@@ -237,11 +170,8 @@ export const ResponsiveFullscreen: Story = {
 export const PerformanceMonitoring: Story = {
   name: '性能监控',
   args: {
-    width: '100%',
-    height: '600px',
     showGrid: true,
     showStats: true,
-    backgroundColor: '#ffffff',
   },
   render: (args) => (
     <World {...args}>
@@ -268,11 +198,8 @@ export const PerformanceMonitoring: Story = {
 export const FixedSize: Story = {
   name: '固定尺寸',
   args: {
-    width: '800px',
-    height: '400px',
     showGrid: true,
     showStats: false,
-    backgroundColor: '#f5f5dc',
   },
   render: (args) => (
     <div
@@ -302,12 +229,16 @@ export const FixedSize: Story = {
 export const MinimalSetup: Story = {
   name: '最小配置',
   args: {
-    width: '100%',
-    height: '600px',
     showGrid: false,
     showStats: false,
-    backgroundColor: '#1a1a1a',
   },
+  render: (args) => (
+    <World {...args}>
+      <Box args={[2, 2, 2]} position={[0, 1, 0]}>
+        <meshStandardMaterial color="#ffffff" metalness={0.3} roughness={0.4} />
+      </Box>
+    </World>
+  ),
   parameters: {
     docs: {
       description: {
