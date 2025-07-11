@@ -2,11 +2,11 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "mcp__yakbox__.*",
+        "matcher": "mcp__infinicube__.*",
         "hooks": [
           {
             "type": "command",
-            "command": "node /home/yarnb/.claude/scripts/block-mcp-tool.js yakbox"
+            "command": "node /home/yarnb/.claude/scripts/block-mcp-tool.js infinicube"
           }
         ]
       }
