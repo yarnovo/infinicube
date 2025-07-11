@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+coverage/
+.cache/
+
+# Storybook
+storybook-static/
+
+# Generated files
+*.d.ts
+*.min.js
+*.map
+
+# Lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+
+# Test snapshots
+**/__snapshots__/

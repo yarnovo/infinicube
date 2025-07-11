@@ -1,0 +1,206 @@
+name: CI-CD
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - 'v*' # 匹配所有以 v 开头的标签
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  # CI Job - 代码质量检查
+  quality-check:
+    name: Quality Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+
+      - name: Run Lint
+        run: npm run lint
+
+      - name: Run Type Check
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Check build output
+        run: |
+          echo "Checking build output..."
+          ls -la dist/
+          test -f dist/index.js || exit 1
+          test -f dist/index.d.ts || exit 1
+          echo "✅ All build files present"
+
+      - name: Run Tests
+        run: npm test
+
+      # 如果是 tag 触发，上传构建产物供后续发布使用
+      - name: Upload build artifacts
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
+
+  # CD Job - 验证和发布（仅在推送 tag 时执行）
+  validate-and-publish:
+    name: Validate and Publish
+    runs-on: ubuntu-latest
+    needs: quality-check
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Validate tag format with bumpster
+        id: validate_tag
+        run: |
+          TAG_VERSION="${{ github.ref_name }}"
+          VERSION="${TAG_VERSION#v}"  # Remove 'v' prefix
+
+          echo "📦 Validating version: $VERSION"
+
+          # 使用 bumpster 验证版本号
+          if npx bumpster validate "$VERSION"; then
+            echo "✅ Version format is valid"
+          else
+            echo "❌ Invalid version format"
+            exit 1
+          fi
+
+          # 检查是否是预发布版本
+          if [[ "$VERSION" =~ -(alpha|beta|rc)\. ]]; then
+            PRERELEASE_TYPE="${BASH_REMATCH[1]}"
+            echo "📦 This is a pre-release version: $PRERELEASE_TYPE"
+            echo "is_prerelease=true" >> $GITHUB_OUTPUT
+            echo "prerelease_type=$PRERELEASE_TYPE" >> $GITHUB_OUTPUT
+          else
+            echo "📦 This is a production release"
+            echo "is_prerelease=false" >> $GITHUB_OUTPUT
+            echo "prerelease_type=" >> $GITHUB_OUTPUT
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Verify package version matches tag
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          TAG_VERSION="${{ steps.validate_tag.outputs.version }}"
+          if [ "$PACKAGE_VERSION" != "$TAG_VERSION" ]; then
+            echo "❌ Error: package.json version ($PACKAGE_VERSION) doesn't match tag version ($TAG_VERSION)"
+            echo "📝 Please update package.json version before creating the tag"
+            echo "   Run: npm version $TAG_VERSION"
+            exit 1
+          fi
+          echo "✅ Version verified: $PACKAGE_VERSION"
+
+      - name: Publish to NPM
+        run: |
+          if [[ "${{ steps.validate_tag.outputs.is_prerelease }}" == "true" ]]; then
+            echo "📦 Publishing pre-release version with ${{ steps.validate_tag.outputs.prerelease_type }} tag"
+            npm publish --access public --tag ${{ steps.validate_tag.outputs.prerelease_type }}
+          else
+            echo "📦 Publishing production version"
+            npm publish --access public
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Verify NPM publish
+        run: |
+          echo "⏳ Waiting for NPM to update..."
+          sleep 30
+          npm view yakbox@${{ steps.validate_tag.outputs.version }} version
+          echo "✅ Package published to NPM"
+
+      - name: Create Release Notes
+        run: |
+          IS_PRERELEASE="${{ steps.validate_tag.outputs.is_prerelease }}"
+          PRERELEASE_TYPE="${{ steps.validate_tag.outputs.prerelease_type }}"
+
+          PRERELEASE_LABEL=""
+          if [[ "$IS_PRERELEASE" == "true" ]]; then
+            case "$PRERELEASE_TYPE" in
+              alpha) PRERELEASE_LABEL=" (Alpha)" ;;
+              beta) PRERELEASE_LABEL=" (Beta)" ;;
+              rc) PRERELEASE_LABEL=" (Release Candidate)" ;;
+            esac
+          fi
+
+          cat > release-notes.md << EOF
+          ## Yakbox v${{ steps.validate_tag.outputs.version }}${PRERELEASE_LABEL}
+
+          ### 📦 Installation
+
+          **NPM:**
+          \`\`\`bash
+          npm install yakbox@${{ steps.validate_tag.outputs.version }}
+          \`\`\`
+
+          ### 📊 Bundle Size
+          - ESM: ~8.1KB (gzipped: ~2.8KB)
+
+          ### 🔗 Links
+          - [NPM Package](https://www.npmjs.com/package/yakbox)
+          - [Documentation](https://github.com/${{ github.repository }}#readme)
+
+          ### 📄 Assets
+          Download the build files below.
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: release-notes.md
+          prerelease: ${{ steps.validate_tag.outputs.is_prerelease == 'true' }}
+          files: |
+            dist/index.js
+            dist/index.d.ts
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "## 🎉 Release v${{ steps.validate_tag.outputs.version }} Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Published to:" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ NPM: https://www.npmjs.com/package/yakbox/v/${{ steps.validate_tag.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ GitHub Release: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
