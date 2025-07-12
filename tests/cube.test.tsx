@@ -60,19 +60,13 @@ describe('Cube Component Tests', () => {
       <Cube cube={mockCube} isSelected={true} />
     );
 
-    // 查找小写的材质类型（JSX 组件名）
-    const materials = [
-      ...renderer.scene.findAllByType('standard'),
-      ...renderer.scene.findAllByType('basic'),
-      ...renderer.scene.findAllByType('physical'),
-      ...renderer.scene.findAllByType('phong'),
-      ...renderer.scene.findAllByType('lambert'),
-    ];
-
+    // 查找材质 - meshStandardMaterial 是实际的材质组件
+    const materials = renderer.scene.findAllByType('MeshStandardMaterial');
     expect(materials.length).toBeGreaterThanOrEqual(1);
+
     const material = materials[0];
-    // 由于默认主题的选中颜色是 #ffffff，而不是立方体颜色
-    expect(material.props.emissive).toBe('#ffffff');
+    // 选中时使用立方体的颜色作为发光色
+    expect(material.props.emissive).toBe('#ff0000');
     expect(material.props.emissiveIntensity).toBe(0.3);
   });
 
@@ -81,16 +75,10 @@ describe('Cube Component Tests', () => {
       <Cube cube={mockCube} isSelected={false} />
     );
 
-    // 查找小写的材质类型（JSX 组件名）
-    const materials = [
-      ...renderer.scene.findAllByType('standard'),
-      ...renderer.scene.findAllByType('basic'),
-      ...renderer.scene.findAllByType('physical'),
-      ...renderer.scene.findAllByType('phong'),
-      ...renderer.scene.findAllByType('lambert'),
-    ];
-
+    // 查找材质 - meshStandardMaterial 是实际的材质组件
+    const materials = renderer.scene.findAllByType('MeshStandardMaterial');
     expect(materials.length).toBeGreaterThanOrEqual(1);
+
     const material = materials[0];
     expect(material.props.emissiveIntensity || 0).toBe(0);
   });

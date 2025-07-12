@@ -1,20 +1,18 @@
 import { forwardRef, useImperativeHandle, useState, useCallback } from 'react';
 import { World, type WorldProps } from './world';
 import { Cube } from './cube';
-import type { CubeTheme } from '../types/theme';
 
 export interface Cube {
   id: string;
   position: [number, number, number];
   color?: string;
   size?: number;
-  theme?: CubeTheme | string;
 }
 
 export interface InfinicubeRef {
   createCube: (
     position: [number, number, number],
-    options?: { color?: string; size?: number; theme?: CubeTheme | string }
+    options?: { color?: string; size?: number }
   ) => string;
   selectCube: (id: string) => void;
   deleteCube: (id: string) => void;
@@ -28,20 +26,11 @@ export interface InfinicubeProps extends WorldProps {
   onCubeSelect?: (cube: Cube | null) => void;
   onCubeDelete?: (id: string) => void;
   onCubeUpdate?: (cube: Cube) => void;
-  defaultTheme?: CubeTheme | string; // 默认主题
 }
 
 export const Infinicube = forwardRef<InfinicubeRef, InfinicubeProps>(
   (
-    {
-      initialCubes = [],
-      onCubeCreate,
-      onCubeSelect,
-      onCubeDelete,
-      defaultTheme,
-      children,
-      ...worldProps
-    },
+    { initialCubes = [], onCubeCreate, onCubeSelect, onCubeDelete, children, ...worldProps },
     ref
   ) => {
     const [cubes, setCubes] = useState<Cube[]>(initialCubes);
@@ -53,7 +42,6 @@ export const Infinicube = forwardRef<InfinicubeRef, InfinicubeProps>(
         options?: {
           color?: string;
           size?: number;
-          theme?: CubeTheme | string;
         }
       ) => {
         const newCube: Cube = {
@@ -65,14 +53,13 @@ export const Infinicube = forwardRef<InfinicubeRef, InfinicubeProps>(
               .toString(16)
               .padStart(6, '0')}`,
           size: options?.size || 1,
-          theme: options?.theme || defaultTheme,
         };
 
         setCubes((prev) => [...prev, newCube]);
         onCubeCreate?.(newCube);
         return newCube.id;
       },
-      [onCubeCreate, defaultTheme]
+      [onCubeCreate]
     );
 
     const selectCube = useCallback(

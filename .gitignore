@@ -28,6 +28,4 @@ dist-ssr
 *storybook.log
 storybook-static
 
-.claude_memory_cache.json
-
 .todo/

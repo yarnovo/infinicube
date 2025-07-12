@@ -9,6 +9,3 @@ export type { InfinicubeProps, InfinicubeRef, Cube } from './components/infinicu
 
 export { Cube as CubeComponent } from './components/cube';
 export type { CubeProps } from './components/cube';
-
-export type { CubeTheme } from './types/theme';
-export { PRESET_THEMES, getTheme } from './types/theme';
