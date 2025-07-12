@@ -1,7 +1,6 @@
-import { useRef } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
-import { Infinicube, type InfinicubeRef } from '../src/components/infinicube';
+import { Infinicube } from '../src/components/infinicube';
 
 const meta = {
   title: 'Components/Infinicube',
@@ -142,72 +141,6 @@ export const WithInitialCubes: Story = {
     docs: {
       description: {
         story: '展示如何使用 initialCubes 属性预设一些立方体',
-      },
-    },
-  },
-};
-
-export const InteractivePlayground: Story = {
-  name: '交互式演示',
-  args: {
-    ...Default.args,
-    showStats: true,
-  },
-  render: function Render(args) {
-    const ref = useRef<InfinicubeRef>(null);
-
-    return (
-      <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
-        <div
-          style={{
-            position: 'absolute',
-            top: 20,
-            left: 20,
-            zIndex: 10,
-            display: 'flex',
-            gap: 10,
-            flexWrap: 'wrap',
-          }}
-        >
-          <button
-            onClick={() => {
-              const x = Math.random() * 6 - 3;
-              const z = Math.random() * 6 - 3;
-              ref.current?.createCube([x, 1, z]);
-            }}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#4ecdc4',
-              color: 'white',
-              border: 'none',
-              borderRadius: 5,
-              cursor: 'pointer',
-            }}
-          >
-            创建随机立方体
-          </button>
-          <button
-            onClick={() => ref.current?.clearCubes()}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#ff6b6b',
-              color: 'white',
-              border: 'none',
-              borderRadius: 5,
-              cursor: 'pointer',
-            }}
-          >
-            清空所有立方体
-          </button>
-        </div>
-        <Infinicube ref={ref} {...args} />
-      </div>
-    );
-  },
-  parameters: {
-    docs: {
-      description: {
-        story: '提供交互式按钮来演示 Infinicube 的功能',
       },
     },
   },

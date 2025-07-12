@@ -143,30 +143,6 @@ export const WithObjects: Story = {
   },
 };
 
-export const ResponsiveFullscreen: Story = {
-  name: '响应式全屏',
-  args: {
-    showGrid: true,
-    showStats: false,
-  },
-  render: (args) => (
-    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}>
-      <World {...args}>
-        <Box args={[2, 2, 2]} position={[0, 1, 0]}>
-          <meshStandardMaterial color="#00ff00" emissive="#00ff00" emissiveIntensity={0.2} />
-        </Box>
-      </World>
-    </div>
-  ),
-  parameters: {
-    docs: {
-      description: {
-        story: '使用视口单位(vw/vh)创建全屏 3D 场景，适合沉浸式体验。',
-      },
-    },
-  },
-};
-
 export const PerformanceMonitoring: Story = {
   name: '性能监控',
   args: {
@@ -190,37 +166,6 @@ export const PerformanceMonitoring: Story = {
     docs: {
       description: {
         story: '启用性能统计面板，监控 FPS、渲染时间和内存使用。适合性能调优和压力测试。',
-      },
-    },
-  },
-};
-
-export const FixedSize: Story = {
-  name: '固定尺寸',
-  args: {
-    showGrid: true,
-    showStats: false,
-  },
-  render: (args) => (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        padding: '20px',
-        backgroundColor: '#333',
-      }}
-    >
-      <World {...args}>
-        <Sphere args={[1, 64, 64]} position={[0, 1, 0]}>
-          <meshStandardMaterial color="#ff6b6b" metalness={0.5} roughness={0.2} />
-        </Sphere>
-      </World>
-    </div>
-  ),
-  parameters: {
-    docs: {
-      description: {
-        story: '使用固定像素尺寸，适合需要精确控制画布大小的场景，如嵌入到特定布局中。',
       },
     },
   },

@@ -4,7 +4,7 @@ import { Stage } from '../src/components/stage';
 import '../src/index.css';
 
 const withStage = (Story: React.ComponentType) => (
-  <Stage>
+  <Stage width="100vw" height="100vh">
     <Story />
   </Stage>
 );
