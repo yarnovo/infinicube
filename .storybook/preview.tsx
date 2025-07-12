@@ -1,13 +1,5 @@
-import React from 'react';
 import type { Preview } from '@storybook/react-vite';
-import { Stage } from '../src/components/stage';
 import '../src/index.css';
-
-const withStage = (Story: React.ComponentType) => (
-  <Stage width="100vw" height="100vh">
-    <Story />
-  </Stage>
-);
 
 const preview: Preview = {
   parameters: {
@@ -25,16 +17,6 @@ const preview: Preview = {
       test: 'todo',
     },
   },
-
-  decorators: [
-    (Story, context) => {
-      // 只为 3D 组件添加 Stage 装饰器
-      if (context.title === 'Components/World' || context.title === 'Components/Infinicube') {
-        return withStage(Story);
-      }
-      return <Story />;
-    },
-  ],
 };
 
 export default preview;

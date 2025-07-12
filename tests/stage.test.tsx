@@ -13,8 +13,8 @@ describe('Stage Component DOM Tests', () => {
     const wrapper = container.firstChild as HTMLDivElement;
     expect(wrapper).toBeDefined();
     expect(wrapper.tagName).toBe('DIV');
-    expect(wrapper.style.width).toBe('100%');
-    expect(wrapper.style.height).toBe('600px');
+    expect(wrapper.style.width).toBe('100vw');
+    expect(wrapper.style.height).toBe('100vh');
     expect(wrapper.style.backgroundColor).toBe('rgb(240, 240, 240)');
   });
 

@@ -7,8 +7,8 @@ export interface StageProps extends CanvasProps {
 }
 
 export const Stage: React.FC<StageProps> = ({
-  width = '100%',
-  height = '600px',
+  width = '100vw',
+  height = '100vh',
   backgroundColor = '#f0f0f0',
   children,
   ...canvasProps

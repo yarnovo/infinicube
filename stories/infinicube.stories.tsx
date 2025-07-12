@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
+import { Stage } from '../src/components/stage';
 import { Infinicube } from '../src/components/infinicube';
 
 const meta = {
@@ -136,12 +137,20 @@ function App() {
       defaultValue: false,
     },
   },
+  decorators: [
+    (Story) => (
+      <Stage>
+        <Story />
+      </Stage>
+    ),
+  ],
 } satisfies Meta<typeof Infinicube>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+  name: '默认组件',
   args: {
     showGrid: true,
     showStats: false,

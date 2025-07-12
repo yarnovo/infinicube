@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { Stage } from '../src/components/stage';
 import { World } from '../src/components/world';
 import { Box, Sphere, Torus } from '@react-three/drei';
 
@@ -103,12 +104,20 @@ function App() {
       },
     },
   },
+  decorators: [
+    (Story) => (
+      <Stage>
+        <Story />
+      </Stage>
+    ),
+  ],
 } satisfies Meta<typeof World>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+  name: '默认世界',
   args: {
     showGrid: true,
     showStats: false,

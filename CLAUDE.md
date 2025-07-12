@@ -30,9 +30,10 @@
 
 ### 核心组件
 
-1. **Stage** - Canvas 容器组件，提供 3D 渲染环境
+1. **Stage** - Canvas 容器组件，提供 3D 渲染环境（默认 100vw x 100vh）
 2. **World** - 3D 场景组件，包含灯光、控制器、网格等
 3. **Infinicube** - 主组件，管理立方体的创建、选择、删除
+4. **Cube** - 立方体渲染组件，支持多种主题和动画效果
 
 ### 组件 API
 
@@ -118,6 +119,54 @@ ref.current.clearCubes();
    - Stage：仅测试 DOM 结构
    - World/Infinicube：使用 @react-three/test-renderer 测试 3D 结构
 
+## 主题系统
+
+### 预设主题
+
+- **default** - 默认标准材质主题
+- **metal** - 金属质感主题
+- **glass** - 玻璃透明主题
+- **neon** - 霓虹发光主题（带旋转动画）
+- **wood** - 木质纹理主题
+- **crystal** - 水晶主题（带浮动和旋转动画）
+- **fire** - 火焰主题（带缩放和浮动动画）
+- **ice** - 冰霜主题
+
+### 主题配置
+
+```typescript
+interface CubeTheme {
+  geometry?: {
+    size?: [number, number, number];
+    segments?: [number, number, number];
+  };
+  material?: {
+    type?: 'standard' | 'basic' | 'physical' | 'phong' | 'lambert';
+    color?: string;
+    metalness?: number;
+    roughness?: number;
+    opacity?: number;
+    emissive?: string;
+    emissiveIntensity?: number;
+  };
+  animation?: {
+    rotation?: { speed?: [number, number, number]; enabled?: boolean };
+    scale?: { min?: number; max?: number; speed?: number; enabled?: boolean };
+    float?: { amplitude?: number; speed?: number; enabled?: boolean };
+  };
+  outline?: {
+    enabled?: boolean;
+    color?: string;
+    thickness?: number;
+  };
+  selection?: {
+    emissiveColor?: string;
+    emissiveIntensity?: number;
+    scale?: number;
+  };
+}
+```
+
 ## 项目结构
 
 ```
@@ -125,14 +174,16 @@ src/
 ├── components/
 │   ├── stage.tsx       # Canvas 容器
 │   ├── world.tsx       # 3D 场景
-│   └── infinicube.tsx  # 主组件
+│   ├── infinicube.tsx  # 主组件
+│   └── cube.tsx        # 立方体组件（集成主题系统）
+├── types/
+│   └── theme.ts        # 主题类型定义和预设主题
 ├── index.ts            # 导出入口
 tests/
 ├── setup.ts            # 测试环境配置
-├── *-functional.test.tsx  # 功能测试
-└── *-props.test.tsx    # 属性测试
+└── *.test.tsx          # 测试文件
 stories/
-└── *.stories.tsx       # Storybook 故事
+└── *.stories.tsx       # Storybook 故事（包含中文名称）
 ```
 
 ## 构建配置
