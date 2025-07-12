@@ -181,6 +181,15 @@ const customCube = {
       },
     },
   },
+  decorators: [
+    (Story) => (
+      <Stage>
+        <World>
+          <Story />
+        </World>
+      </Stage>
+    ),
+  ],
 };
 
 export default meta;
@@ -195,13 +204,6 @@ const defaultCube: CubeData = {
 
 export const Default: Story = {
   name: '默认立方体',
-  render: (args) => (
-    <Stage>
-      <World>
-        <Cube {...args} />
-      </World>
-    </Stage>
-  ),
   args: {
     cube: defaultCube,
     isSelected: false,
@@ -210,13 +212,6 @@ export const Default: Story = {
 
 export const Selected: Story = {
   name: '选中状态',
-  render: (args) => (
-    <Stage>
-      <World>
-        <Cube {...args} />
-      </World>
-    </Stage>
-  ),
   args: {
     cube: defaultCube,
     isSelected: true,
@@ -225,13 +220,6 @@ export const Selected: Story = {
 
 export const Large: Story = {
   name: '大型立方体',
-  render: (args) => (
-    <Stage>
-      <World>
-        <Cube {...args} />
-      </World>
-    </Stage>
-  ),
   args: {
     cube: {
       ...defaultCube,
@@ -244,13 +232,6 @@ export const Large: Story = {
 
 export const Small: Story = {
   name: '小型立方体',
-  render: (args) => (
-    <Stage>
-      <World>
-        <Cube {...args} />
-      </World>
-    </Stage>
-  ),
   args: {
     cube: {
       ...defaultCube,
@@ -263,13 +244,6 @@ export const Small: Story = {
 
 export const CustomColor: Story = {
   name: '自定义颜色',
-  render: (args) => (
-    <Stage>
-      <World>
-        <Cube {...args} />
-      </World>
-    </Stage>
-  ),
   args: {
     cube: {
       ...defaultCube,
@@ -281,13 +255,6 @@ export const CustomColor: Story = {
 
 export const PositionedCube: Story = {
   name: '定位立方体',
-  render: (args) => (
-    <Stage>
-      <World>
-        <Cube {...args} />
-      </World>
-    </Stage>
-  ),
   args: {
     cube: {
       ...defaultCube,

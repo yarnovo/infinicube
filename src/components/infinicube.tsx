@@ -1,5 +1,4 @@
 import { forwardRef, useImperativeHandle, useState, useCallback } from 'react';
-import { World, type WorldProps } from './world';
 import { Cube } from './cube';
 
 export interface Cube {
@@ -20,19 +19,17 @@ export interface InfinicubeRef {
   clearCubes: () => void;
 }
 
-export interface InfinicubeProps extends WorldProps {
+export interface InfinicubeProps {
   initialCubes?: Cube[];
   onCubeCreate?: (cube: Cube) => void;
   onCubeSelect?: (cube: Cube | null) => void;
   onCubeDelete?: (id: string) => void;
   onCubeUpdate?: (cube: Cube) => void;
+  children?: React.ReactNode;
 }
 
 export const Infinicube = forwardRef<InfinicubeRef, InfinicubeProps>(
-  (
-    { initialCubes = [], onCubeCreate, onCubeSelect, onCubeDelete, children, ...worldProps },
-    ref
-  ) => {
+  ({ initialCubes = [], onCubeCreate, onCubeSelect, onCubeDelete, children }, ref) => {
     const [cubes, setCubes] = useState<Cube[]>(initialCubes);
     const [selectedCubeId, setSelectedCubeId] = useState<string | null>(null);
 
@@ -113,7 +110,7 @@ export const Infinicube = forwardRef<InfinicubeRef, InfinicubeProps>(
     );
 
     return (
-      <World {...worldProps}>
+      <>
         {cubes.map((cube) => (
           <Cube
             key={cube.id}
@@ -123,7 +120,7 @@ export const Infinicube = forwardRef<InfinicubeRef, InfinicubeProps>(
           />
         ))}
         {children}
-      </World>
+      </>
     );
   }
 );

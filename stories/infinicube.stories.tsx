@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 import { Stage } from '../src/components/stage';
+import { World } from '../src/components/world';
 import { Infinicube } from '../src/components/infinicube';
 
 const meta = {
@@ -15,7 +16,7 @@ const meta = {
 
 ## 是什么
 
-Infinicube 是一个基于 React Three Fiber 的 3D 资源管理组件，提供了在 3D 空间中创建、选择和管理立方体的能力。它将复杂的 3D 交互逻辑封装成简单易用的 React 组件。
+Infinicube 是一个专注于立方体管理的 React 组件，提供了创建、选择、删除立方体的核心功能。它不包含 3D 场景配置，需要与 World 组件配合使用。
 
 ## 为什么
 
@@ -49,6 +50,17 @@ Infinicube 是一个基于 React Three Fiber 的 3D 资源管理组件，提供�
 
 ## 如何用
 
+### 依赖关系
+
+\`\`\`
+Stage (容器层)
+  └── World (场景层)
+        └── Infinicube (管理层)
+              └── Cube (元素层)
+\`\`\`
+
+**注意**：Infinicube 本身不包含 3D 场景配置，必须放置在 World 组件内部使用。
+
 ### API 接口
 
 ### 命令式 API (通过 ref)
@@ -66,12 +78,13 @@ interface InfinicubeRef {
 ### Props
 
 \`\`\`typescript
-interface InfinicubeProps extends WorldProps {
+interface InfinicubeProps {
   initialCubes?: Cube[];
   onCubeCreate?: (cube: Cube) => void;
   onCubeSelect?: (cube: Cube | null) => void;
   onCubeDelete?: (id: string) => void;
   onCubeUpdate?: (cube: Cube) => void;
+  children?: React.ReactNode;
 }
 \`\`\`
 
@@ -79,7 +92,7 @@ interface InfinicubeProps extends WorldProps {
 
 \`\`\`jsx
 import { useRef } from 'react';
-import { Infinicube } from '@infinicube/components';
+import { Stage, World, Infinicube } from '@infinicube/components';
 
 function App() {
   const infinicubeRef = useRef(null);
@@ -92,10 +105,14 @@ function App() {
   return (
     <>
       <button onClick={handleCreateCube}>创建立方体</button>
-      <Infinicube
-        ref={infinicubeRef}
-        onCubeSelect={(cube) => console.log('Selected:', cube)}
-      />
+      <Stage>
+        <World>
+          <Infinicube
+            ref={infinicubeRef}
+            onCubeSelect={(cube) => console.log('Selected:', cube)}
+          />
+        </World>
+      </Stage>
     </>
   );
 }
@@ -109,38 +126,52 @@ function App() {
     initialCubes: {
       description: '初始立方体数组',
       control: 'object',
+      table: {
+        type: { summary: 'Cube[]' },
+      },
     },
     onCubeCreate: {
       description: '立方体创建时的回调',
       action: 'cube-created',
+      table: {
+        type: { summary: '(cube: Cube) => void' },
+      },
     },
     onCubeSelect: {
       description: '立方体选中时的回调',
       action: 'cube-selected',
+      table: {
+        type: { summary: '(cube: Cube | null) => void' },
+      },
     },
     onCubeDelete: {
       description: '立方体删除时的回调',
       action: 'cube-deleted',
+      table: {
+        type: { summary: '(id: string) => void' },
+      },
     },
     onCubeUpdate: {
       description: '立方体更新时的回调',
       action: 'cube-updated',
+      table: {
+        type: { summary: '(cube: Cube) => void' },
+      },
     },
-    showGrid: {
-      control: 'boolean',
-      description: '是否显示网格',
-      defaultValue: true,
-    },
-    showStats: {
-      control: 'boolean',
-      description: '是否显示性能统计',
-      defaultValue: false,
+    children: {
+      description: '子组件内容',
+      control: false,
+      table: {
+        type: { summary: 'React.ReactNode' },
+      },
     },
   },
   decorators: [
     (Story) => (
       <Stage>
-        <Story />
+        <World>
+          <Story />
+        </World>
       </Stage>
     ),
   ],
@@ -152,8 +183,6 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   name: '默认组件',
   args: {
-    showGrid: true,
-    showStats: false,
     onCubeCreate: fn(),
     onCubeSelect: fn(),
     onCubeDelete: fn(),

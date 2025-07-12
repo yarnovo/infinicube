@@ -5,14 +5,8 @@ import { Infinicube, type InfinicubeRef, type Cube } from '../src/components/inf
 import type { Mesh } from 'three';
 
 describe('Infinicube Component Tests', () => {
-  it('should render empty scene initially', async () => {
+  it('should render empty initially', async () => {
     const renderer = await ReactThreeTestRenderer.create(<Infinicube />);
-
-    // 检查 World 组件的元素
-    const lights = renderer.scene.findAll(
-      (instance) => instance.type === 'AmbientLight' || instance.type === 'DirectionalLight'
-    );
-    expect(lights).toHaveLength(2);
 
     // 初始时不应该有立方体
     const meshes = renderer.scene.findAllByType('Mesh');
@@ -93,22 +87,6 @@ describe('Infinicube Component Tests', () => {
       return (mesh.instance as Mesh).geometry?.type === 'BoxGeometry';
     });
     expect(cubeMeshes).toHaveLength(2);
-  });
-
-  it('should pass World props correctly', async () => {
-    const renderer = await ReactThreeTestRenderer.create(
-      <Infinicube showGrid={false} showStats={true} />
-    );
-
-    // 当 showGrid=false 时，不应该有 Grid 的 Mesh
-    const meshes = renderer.scene.findAllByType('Mesh');
-    expect(meshes).toHaveLength(0);
-
-    // 但仍然应该有灯光
-    const lights = renderer.scene.findAll(
-      (instance) => instance.type === 'AmbientLight' || instance.type === 'DirectionalLight'
-    );
-    expect(lights).toHaveLength(2);
   });
 
   it('should handle cube lifecycle callbacks', async () => {
