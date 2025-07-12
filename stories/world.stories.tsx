@@ -15,64 +15,128 @@ const meta = {
 
 ## 是什么
 
-World 是一个基于 React Three Fiber 的 3D 场景容器组件，提供了完整的 3D 世界环境，包括相机、灯光、控制器和可选的辅助工具。
+World 是 Infinicube 组件库的核心场景组件，基于 React Three Fiber 构建，提供了完整的 3D 场景环境。它封装了相机控制、灯光系统、网格辅助线和性能监控等基础功能，是所有 3D 内容的容器。
 
 ## 为什么
 
-- **开箱即用**：预配置了常用的 3D 场景设置，无需手动配置相机、灯光等
-- **高度可定制**：支持自定义尺寸、背景色、网格显示等
-- **性能监控**：内置可选的性能统计显示
-- **响应式设计**：支持百分比和固定尺寸，适应各种布局需求
+- **开箱即用**：预配置了透视相机、环境光、方向光等必要元素
+- **交互控制**：集成 OrbitControls，支持鼠标/触摸旋转、缩放和平移
+- **开发友好**：可选的网格辅助线和性能统计面板
+- **灵活扩展**：支持添加任意 Three.js/R3F 组件作为子元素
+- **性能优化**：合理的默认配置，平衡视觉效果和性能
 
 ## 谁在用
 
-- 需要快速搭建 3D 场景的前端开发者
-- 构建 3D 可视化应用的团队
-- 学习 React Three Fiber 的初学者
+- 使用 Infinicube 构建 3D 应用的开发者
+- 需要标准化 3D 场景配置的团队
+- React Three Fiber 项目开发者
+- 3D 可视化应用的设计师和工程师
 
 ## 何时用
 
-- 需要创建 3D 可视化界面时
-- 展示 3D 模型或数据时
-- 构建交互式 3D 应用时
-- 需要在 React 应用中嵌入 3D 内容时
+- 创建任何需要 3D 交互的场景
+- 展示 3D 模型或数据可视化
+- 开发 3D 编辑器或设计工具
+- 构建游戏或仿真应用
+- 教学演示和交互式内容
 
 ## 在哪用
 
+- 作为 Stage 组件的直接子组件
+- 3D 产品展示页面
 - 数据可视化仪表板
-- 产品展示页面
-- 教育互动应用
-- 游戏和娱乐应用
-- 建筑和工程可视化
+- 在线 3D 编辑器
+- 教育和培训应用
 
 ## 如何用
 
+### 依赖关系
 
-### 完整示例
+\`\`\`
+Stage (容器层)
+  └── World (场景层)
+        ├── 相机系统 (PerspectiveCamera)
+        ├── 灯光系统 (AmbientLight + DirectionalLight)
+        ├── 控制系统 (OrbitControls)
+        ├── 辅助工具 (Grid Helper + Stats)
+        └── 用户内容 (children)
+\`\`\`
+
+### API 接口
+
+\`\`\`typescript
+interface WorldProps {
+  children?: React.ReactNode;
+  showGrid?: boolean;
+  showStats?: boolean;
+}
+\`\`\`
+
+### Props 说明
+
+- **children**: 3D 场景内容，可以是任何 Three.js/R3F 组件
+- **showGrid**: 是否显示网格辅助线，默认 true
+- **showStats**: 是否显示性能统计面板，默认 false
+
+### 场景配置
+
+#### 相机设置
+- 类型：透视相机 (PerspectiveCamera)
+- 位置：[5, 5, 5]
+- 视野：75 度
+
+#### 灯光设置
+- 环境光：强度 0.5，提供基础照明
+- 方向光：强度 1.0，位置 [10, 10, 5]，投射阴影
+
+#### 控制器设置
+- 启用阻尼效果，提供平滑的交互体验
+- 支持鼠标右键平移
+- 触摸设备支持双指缩放和旋转
+
+## 使用示例
+
+### 基础用法
 
 \`\`\`jsx
-import { World } from '@infinicube/components'
-import { Box } from '@react-three/drei'
+import { Stage, World } from '@infinicube/components';
+import { Box } from '@react-three/drei';
 
 function App() {
   return (
-    <World 
-      showGrid={true}
-      showStats={true}
-    >
-      <Box position={[0, 1, 0]}>
-        <meshStandardMaterial color="orange" />
-      </Box>
-    </World>
-  )
+    <Stage>
+      <World>
+        <Box position={[0, 1, 0]}>
+          <meshStandardMaterial color="orange" />
+        </Box>
+      </World>
+    </Stage>
+  );
 }
+\`\`\`
+
+### 隐藏辅助工具
+
+\`\`\`jsx
+<World showGrid={false} showStats={false}>
+  {/* 纯净的 3D 场景 */}
+</World>
+\`\`\`
+
+### 性能监控模式
+
+\`\`\`jsx
+<World showGrid={true} showStats={true}>
+  {/* 开发和调试时使用 */}
+</World>
 \`\`\`
 
 ### 注意事项
 
-1. **性能考虑**：避免创建过大的画布
-2. **响应式设计**：组件会自动适应容器尺寸
-3. **交互体验**：确保画布有足够的空间以提供良好的交互体验
+1. **性能考虑**：showStats 会略微影响性能，生产环境建议关闭
+2. **坐标系统**：使用右手坐标系，Y 轴向上
+3. **单位系统**：默认单位可视为米，网格间距为 1 单位
+4. **交互范围**：相机距离限制在合理范围内，避免过近或过远
         `,
       },
     },
