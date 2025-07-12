@@ -155,18 +155,19 @@ stories/
 
 否则可能生成无效的颜色值如 `#c79e1`。
 
-### Window 类型扩展
+## 测试策略原则
 
-在 Storybook 测试中需要在 Window 上存储 ref，应创建类型定义文件：
+### Storybook 的正确使用
 
-```typescript
-// stories/global.d.ts
-declare global {
-  interface Window {
-    __infinicubeRef?: InfinicubeRef | null;
-  }
-}
-```
+- **Storybook 仅用于 UI 展示**，不进行交互测试
+- **不使用 play 函数**：因为无法测试实际的 3D 渲染输出，只能测试 API 调用
+- **未来可配合视觉测试**：目前没有视觉测试，暂不需要
+
+### 测试文件组织
+
+- **一个组件对应一个测试文件**：不要创建多个测试文件测试同一个组件
+- **使用 @react-three/test-renderer**：在 tests/ 文件夹中测试组件结构和交互逻辑
+- **不需要额外的类型定义文件**：避免创建不必要的 global.d.ts
 
 <!-- 最后更新: 2025-01-11 -->
 <!-- 说明: Infinicube 项目技术规范、架构设计和测试策略 -->
